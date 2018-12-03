@@ -4,7 +4,7 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: RippleMedMaterial
   m_Shader: {fileID: 4800000, guid: abd4b2dcc0fcc304ca3eb98d4d248b0e, type: 3}
@@ -39,7 +39,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: c3e381ad6145f374981fc2c3a4c32aa9, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6764b5d170cf8480f99af59ab1dd6773, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:

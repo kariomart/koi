@@ -5902,7 +5902,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1637459664604906, guid: d69e96022158940b286f1f2dc7fc03c5, type: 2}
       propertyPath: m_Name
-      value: RippleParticle (1)
+      value: RippleParticle
       objectReference: {fileID: 0}
     - target: {fileID: 199997600146829346, guid: d69e96022158940b286f1f2dc7fc03c5,
         type: 2}
@@ -10863,7 +10863,7 @@ MonoBehaviour:
     m_Bits: 0
   texSize: 2048
   rippleDist: 64
-  rippleCam: {fileID: 0}
+  rippleCam: {fileID: 255105659}
   targetTex: {fileID: 0}
 --- !u!4 &1885725228
 Transform:
