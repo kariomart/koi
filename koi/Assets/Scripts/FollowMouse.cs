@@ -8,18 +8,21 @@ public class FollowMouse : MonoBehaviour {
     Camera cam;
     Transform reticle;
 
+    AudioSource waterSfx;
     // Use this for initialization
     void Start () {
 
         reticle = GameObject.Find("reticle").transform;
         Cursor.visible = false;
         cam = Camera.main;
-
+        waterSfx = GetComponent<AudioSource>();
     }
   
   // Update is called once per frame
   void FixedUpdate () {
 
+        //checkPosition();
+        waterSounds();
         Vector2 mouseDir = (cam.ScreenToWorldPoint(Input.mousePosition) - transform.position).normalized;
         reticle.position = Vector2.Lerp(transform.position, cam.ScreenToWorldPoint(Input.mousePosition), moveSpeed) + mouseDir * 2;
         transform.position = Vector2.Lerp(transform.position, cam.ScreenToWorldPoint(Input.mousePosition), moveSpeed);
@@ -53,5 +56,39 @@ public class FollowMouse : MonoBehaviour {
             
         }
     }
+
+    void checkPosition() {
+
+        if (Mathf.Abs(transform.position.x) > MapGenerator.me.tileSize * MapGenerator.me.xTiles / 2) {
+            transform.position = Vector2.zero;
+        }
+
+        if (Mathf.Abs(transform.position.y) > MapGenerator.me.tileSize * MapGenerator.me.yTiles / 2) {
+            transform.position = Vector2.zero;
+        }
+    }
+
+    void waterSounds() {
+
+        float dis = Vector2.Distance(transform.position, cam.transform.position); 
+        float vol = AudioManager.RemapFloat(dis, 0, 4.5f, 0, 1f);
+        waterSfx.volume = vol;
+
+		if (transform.position.x < Camera.main.transform.position.x) {dis *= -1;}
+		float pan = AudioManager.RemapFloat(dis, -5f, 5f, -1f, 1f);
+        waterSfx.panStereo = pan;
+
+
+    }
+
+
+    void OnTriggerEnter2D(Collider2D coll) {
+
+		if (coll.gameObject.layer == LayerMask.NameToLayer("Food")) {
+			AudioManager.Instance.PlayFoodSound();
+			Destroy(coll.gameObject);
+		}
+
+	}
 	
 }

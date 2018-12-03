@@ -29,6 +29,7 @@ public class AudioManager : MonoBehaviour {
 	//our audio mixer groups, which we are routing our sfx to
 	[Header("Mixer Groups")] 
 	public AudioMixerGroup abstractAmbience;
+	public AudioMixerGroup sfxMixer;
 	public AudioMixer ambienceMaster;
 
 	//Mixer snapshots let us crossfade easily between game states.
@@ -81,13 +82,20 @@ public class AudioManager : MonoBehaviour {
 		//First find a clip randomly from the array
 		AudioClip[] scale = scales[scaleNum];
 		foodSound = scale[Random.Range(0, scale.Length)];
-		float dis = Vector2.Distance(Camera.main.transform.position, player.transform.position);
-		if (player.transform.position.x < Camera.main.transform.position.x) {dis *= 1;}
-		dis = Mathf.Clamp(dis /= 5f, -1, 1);
+		
 //		Debug.Log(dis);
 		
 		//Then we play this clip - note that nothing is changing for panning and volume is set at 1.0
-		PlaySFX(foodSound, 1.0f, dis, abstractAmbience);
+		PlaySFX(foodSound, 1.0f, getPan(), 5f, abstractAmbience);
+	}
+
+	public void PlayRandomWeatherSFX() {
+		
+		AudioClip sfx;
+		GameState state = GameMaster.me.gameState;
+		sfx = state.sfx[Random.Range(0, state.sfx.Length)];
+		PlaySFX(sfx, 1f, getPan(), sfxMixer);
+
 	}
 	
 	//========================================================================
@@ -98,13 +106,28 @@ public class AudioManager : MonoBehaviour {
 	public void PlaySFX (AudioClip g_SFX, float g_Volume, float g_Pan, AudioMixerGroup g_destGroup) {
 		GameObject t_SFX = Instantiate (myPrefabSFX) as GameObject;
 		t_SFX.name = "SFX_" + g_SFX.name;
-		t_SFX.GetComponent<AudioSource> ().clip = g_SFX;
-		t_SFX.GetComponent<AudioSource> ().volume = g_Volume;
-		t_SFX.GetComponent<AudioSource> ().panStereo = g_Pan;
-		t_SFX.GetComponent<AudioSource> ().outputAudioMixerGroup = g_destGroup;
-		t_SFX.GetComponent<AudioSource> ().Play ();
-		DestroyObject(t_SFX, g_SFX.length);
+		AudioSource source = t_SFX.GetComponent<AudioSource> ();
+		source.clip = g_SFX;
+		source.volume = g_Volume;
+		source.panStereo = g_Pan;
+		source.outputAudioMixerGroup = g_destGroup;
+		source.Play ();
+		Destroy(t_SFX.gameObject, g_SFX.length);
 	}
+
+	public void PlaySFX (AudioClip g_SFX, float g_Volume, float g_Pan, float g_distance, AudioMixerGroup g_destGroup) {
+		GameObject t_SFX = Instantiate (myPrefabSFX) as GameObject;
+		t_SFX.name = "SFX_" + g_SFX.name;
+		AudioSource source = t_SFX.GetComponent<AudioSource> ();
+		source.clip = g_SFX;
+		source.volume = g_Volume;
+		source.panStereo = g_Pan;
+		source.minDistance = g_distance;
+		source.outputAudioMixerGroup = g_destGroup;
+		source.Play ();
+		Destroy(t_SFX.gameObject, g_SFX.length);
+	}
+
 
 	public void LowerSFXOctave() {
 
@@ -122,6 +145,15 @@ public class AudioManager : MonoBehaviour {
 		float newPitch = currentPitch + Mathf.Pow(1.05946f, 12);
 		ambienceMaster.SetFloat("pitch",  newPitch);
 
+	}
+
+	public float getPan() {
+
+		float dis = Vector2.Distance(Camera.main.transform.position, player.transform.position);
+		if (player.transform.position.x < Camera.main.transform.position.x) {dis *= -1;}
+		float pan = Mathf.Clamp(dis /= 5f, -1, 1);
+
+		return pan;
 	}
 
 
