@@ -94,7 +94,8 @@ public class AudioManager : MonoBehaviour {
 		AudioClip sfx;
 		GameState state = GameMaster.me.gameState;
 		sfx = state.sfx[Random.Range(0, state.sfx.Length)];
-		PlaySFX(sfx, 1f, getPan(), sfxMixer);
+		//PlaySFX(sfx, 1f, getPan(), sfxMixer);
+		PlayWeatherSFX(sfx, 1f, 1f, sfxMixer);
 
 	}
 	
@@ -116,6 +117,8 @@ public class AudioManager : MonoBehaviour {
 	}
 
 	public void PlaySFX (AudioClip g_SFX, float g_Volume, float g_Pan, float g_distance, AudioMixerGroup g_destGroup) {
+
+		
 		GameObject t_SFX = Instantiate (myPrefabSFX) as GameObject;
 		t_SFX.name = "SFX_" + g_SFX.name;
 		AudioSource source = t_SFX.GetComponent<AudioSource> ();
@@ -128,6 +131,17 @@ public class AudioManager : MonoBehaviour {
 		Destroy(t_SFX.gameObject, g_SFX.length);
 	}
 
+	public void PlayWeatherSFX (AudioClip g_SFX, float g_Volume, float g_Pan, AudioMixerGroup g_destGroup) {
+		GameObject t_SFX = Instantiate (myPrefabSFX, new Vector2(player.transform.position.x + Random.Range(-10f, 10f), player.transform.position.y + Random.Range(-10f, 10f)), Quaternion.identity);
+		t_SFX.name = "SFX_" + g_SFX.name;
+		AudioSource source = t_SFX.GetComponent<AudioSource> ();
+		source.clip = g_SFX;
+		source.volume = g_Volume;
+		source.panStereo = getPan(t_SFX.transform);
+		source.outputAudioMixerGroup = g_destGroup;
+		source.Play ();
+		Destroy(t_SFX.gameObject, g_SFX.length);
+	}
 
 	public void LowerSFXOctave() {
 
@@ -155,6 +169,16 @@ public class AudioManager : MonoBehaviour {
 
 		return pan;
 	}
+
+	public float getPan(Transform o) {
+
+		float dis = Vector2.Distance(Camera.main.transform.position, o.position);
+		if (o.position.x < Camera.main.transform.position.x) {dis *= -1;}
+		float pan = Mathf.Clamp(dis /= 5f, -1, 1);
+
+		return pan;
+}
+
 
 
 	// public void StartGame() {
