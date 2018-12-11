@@ -64,6 +64,7 @@
 			half height = c.w;
 
 #ifdef DYNAMIC_RIPPLES_ON
+
 			// get the world normal, tangent, and binormal for masking the ripples and converting world normals to tangent normals
 			float3 worldNormal = WorldNormalVector(IN, float3(0, 0, 1));
 			float3 worldTangent = WorldNormalVector(IN, float3(1, 0, 0));

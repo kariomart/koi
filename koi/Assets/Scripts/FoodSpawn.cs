@@ -26,7 +26,7 @@ public class FoodSpawn : MonoBehaviour {
 
 		for (int i = 0; i < numOfFood; i++) {
 
-			GameObject f = Instantiate (food, new Vector3 (Random.Range (-foodRange, foodRange), Random.Range (-foodRange, foodRange), 0), Quaternion.identity);
+			GameObject f = Instantiate (food, new Vector3(Random.Range (-foodRange, foodRange), .51f, Random.Range (-foodRange, foodRange)), Quaternion.identity);
 			f.transform.parent = foodParent.transform;
 
 		}

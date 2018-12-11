@@ -71,11 +71,11 @@ MonoBehaviour:
   depthOfField:
     m_Enabled: 0
     m_Settings:
-      focusDistance: 10
-      aperture: 5.6
-      focalLength: 50
+      focusDistance: 50
+      aperture: 9.8
+      focalLength: 1
       useCameraFov: 0
-      kernelSize: 1
+      kernelSize: 0
   motionBlur:
     m_Enabled: 0
     m_Settings:
@@ -103,8 +103,8 @@ MonoBehaviour:
         intensity: 8.76
         threshold: 1.32
         softKnee: 1
-        radius: 3.43
-        antiFlicker: 0
+        radius: 2.76
+        antiFlicker: 1
       lensDirt:
         texture: {fileID: 2800000, guid: 69e847bbff1cf5449a4ee0bbd045dbc9, type: 3}
         intensity: 0

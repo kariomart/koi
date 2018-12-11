@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class AudioManager : MonoBehaviour {
 	
 	private static AudioManager instance = null;
-	public FollowMouse player;
+	public FollowMouse_3D player;
 	
 	//we need an SFX Prefab - these will be instantiated for the purpose of playing sounds
 	[SerializeField] GameObject myPrefabSFX;
@@ -31,12 +31,15 @@ public class AudioManager : MonoBehaviour {
 	public AudioMixerGroup abstractAmbience;
 	public AudioMixerGroup sfxMixer;
 	public AudioMixer ambienceMaster;
+	public AudioMixer sfxMaster;
 
 	//Mixer snapshots let us crossfade easily between game states.
 	//We can also add weights to multiple snapshots in order to blend them.
 	// [Header("Mixer Snapshots")] 
 	// public AudioMixerSnapshot menuMixerSnapshot;
 	// public AudioMixerSnapshot gameMixerSnapshot;
+	float lowPassMin = 500f;
+	float lowPassMax = 2000f;
 	
 
 	//========================================================================
@@ -63,6 +66,8 @@ public class AudioManager : MonoBehaviour {
 		scales[3] = pentatonicScaleC2;
 
 		ambienceMaster = abstractAmbience.audioMixer;
+		sfxMaster = sfxMixer.audioMixer;
+		sfxMaster.SetFloat("lowPassFreq", lowPassMin);
 
 		// if (SceneManager.GetActiveScene().name == "Menu") {
 		// 	StartMenu();
@@ -132,7 +137,7 @@ public class AudioManager : MonoBehaviour {
 	}
 
 	public void PlayWeatherSFX (AudioClip g_SFX, float g_Volume, float g_Pan, AudioMixerGroup g_destGroup) {
-		GameObject t_SFX = Instantiate (myPrefabSFX, new Vector2(player.transform.position.x + Random.Range(-10f, 10f), player.transform.position.y + Random.Range(-10f, 10f)), Quaternion.identity);
+		GameObject t_SFX = Instantiate (myPrefabSFX, new Vector3(player.transform.position.x + Random.Range(-10f, 10f), player.transform.position.y,  player.transform.position.z + Random.Range(-10f, 10f)), Quaternion.identity);
 		t_SFX.name = "SFX_" + g_SFX.name;
 		AudioSource source = t_SFX.GetComponent<AudioSource> ();
 		source.clip = g_SFX;
@@ -141,6 +146,32 @@ public class AudioManager : MonoBehaviour {
 		source.outputAudioMixerGroup = g_destGroup;
 		source.Play ();
 		Destroy(t_SFX.gameObject, g_SFX.length);
+	}
+
+	public void openFilter() {
+
+		float val;
+		sfxMaster.GetFloat("lowPassFreq", out val);
+
+		if(val < lowPassMax) {
+			sfxMaster.SetFloat("lowPassFreq", val += 5);
+			Debug.Log("opening filter..." + val);
+		} else {
+			GameMaster.me.player.goingUp = false;
+			GameMaster.me.player.goingDown = true;
+			PlayFoodSound();
+		}
+	}
+
+	public void closeFilter() {
+
+		float lpVal;
+		 sfxMaster.GetFloat("lowPassFreq", out lpVal);
+		if(lpVal > lowPassMin) {
+			sfxMaster.SetFloat("lowPassFreq", lpVal -= 5);
+		} else {
+			GameMaster.me.player.goingDown = false;
+		}
 	}
 
 	public void LowerSFXOctave() {
@@ -163,7 +194,7 @@ public class AudioManager : MonoBehaviour {
 
 	public float getPan() {
 
-		float dis = Vector2.Distance(Camera.main.transform.position, player.transform.position);
+		float dis = Vector3.Distance(Camera.main.transform.position, player.transform.position);
 		if (player.transform.position.x < Camera.main.transform.position.x) {dis *= -1;}
 		float pan = Mathf.Clamp(dis /= 5f, -1, 1);
 
@@ -172,7 +203,7 @@ public class AudioManager : MonoBehaviour {
 
 	public float getPan(Transform o) {
 
-		float dis = Vector2.Distance(Camera.main.transform.position, o.position);
+		float dis = Vector3.Distance(Camera.main.transform.position, o.position);
 		if (o.position.x < Camera.main.transform.position.x) {dis *= -1;}
 		float pan = Mathf.Clamp(dis /= 5f, -1, 1);
 

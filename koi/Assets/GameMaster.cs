@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameMaster : MonoBehaviour {
 
 	public static GameMaster me;
+	public FollowMouse_3D player;
 	public GameState[] gameStates;
 	public GameState gameState;
 	public int sfxChance;

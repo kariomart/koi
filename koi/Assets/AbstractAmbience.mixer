@@ -15,6 +15,8 @@ AudioMixerController:
   m_EnableSuspend: 1
   m_UpdateMode: 0
   m_ExposedParameters:
+  - guid: 463dc19baf36b463fb2c326c0a82a9ec
+    name: lowPassFreq
   - guid: a0a7b152401e24ce8902d9df18bd5229
     name: pitch
   m_AudioMixerGroupViews:

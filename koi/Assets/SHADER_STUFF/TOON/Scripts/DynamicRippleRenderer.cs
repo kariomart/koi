@@ -53,7 +53,7 @@ public class DynamicRippleRenderer : MonoBehaviour
 
 		if (Camera.main != null) {
 			newPos = Camera.main.transform.position;
-			Debug.Log(newPos);
+//			Debug.Log(newPos);
 			viewOffset = newPos + Camera.main.transform.forward * rippleDist * 0.5f;
 		}
 
