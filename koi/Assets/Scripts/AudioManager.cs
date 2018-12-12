@@ -102,7 +102,7 @@ public class AudioManager : MonoBehaviour {
 		AudioClip foodSound;
 		//First find a clip randomly from the array
 		AudioClip[] scale = scales[scaleNum];
-		Debug.Log(scale.Length);
+//		Debug.Log(scale.Length);
 
 		int rand = Random.Range(0, scale.Length);
 
