@@ -30,6 +30,7 @@ public class FollowMouse_3D : MonoBehaviour {
     public List<GameObject> foods = new List<GameObject>();
     public float disToFood;
     public LineRenderer line;
+    ParticleSystem FX;
 
 
     // Use this for initialization
@@ -40,6 +41,8 @@ public class FollowMouse_3D : MonoBehaviour {
         cam = Camera.main;
         waterSfx = GetComponent<AudioSource>();
         line = GetComponent<LineRenderer>();
+        depthPercentage = 1;
+        FX = GetComponent<ParticleSystem>();
         
     }
   
@@ -47,7 +50,7 @@ public class FollowMouse_3D : MonoBehaviour {
   void FixedUpdate () {
 
         //checkPosition();
-        //waterSounds();
+        waterSounds();
         //spawnRipple();
         if (foods.Count > 2) {
             checkFood();
@@ -56,7 +59,7 @@ public class FollowMouse_3D : MonoBehaviour {
         AudioManager.Instance.updateFilters();
 
 
-        //AudioManager.Instance.updateDebug();
+        AudioManager.Instance.updateDebug();
         Vector3 mouseDir = (cam.ScreenToWorldPoint(Input.mousePosition) - transform.position);
 		mouseDir.y = 0.51f;
         //reticle.position = Vector2.Lerp(transform.position, cam.ScreenToWorldPoint(Input.mousePosition), moveSpeed) + mouseDir * 2;
@@ -81,14 +84,14 @@ public class FollowMouse_3D : MonoBehaviour {
 
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {
-            AudioManager.Instance.LowerSFXOctave();
+        // if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) {
+        //     AudioManager.Instance.LowerSFXOctave();
             
-        }
+        // }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {
-            AudioManager.Instance.RaiseSFXOctave();
-        }
+        // if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {
+        //     AudioManager.Instance.RaiseSFXOctave();
+        // }
 
         // if (goingUp) {
         //     if (depth > minDepth) {
@@ -122,7 +125,7 @@ public class FollowMouse_3D : MonoBehaviour {
             desiredDepth = 0;
         }
 
-        depth = Mathf.MoveTowards(depth, desiredDepth, .5f);
+        depth = Mathf.MoveTowards(depth, desiredDepth, 1f);
         //Debug.Log("DESIRED DEPTH: " + depth + "\n"  )
         desiredScale = Mathf.Lerp(minScale, maxScale, depth / maxDepth);
         //Debug.Log("SCALE: " + transform.localScale.x + "\n DESIRED SCALE: " + desiredScale); 
@@ -130,7 +133,23 @@ public class FollowMouse_3D : MonoBehaviour {
         transform.localScale = new Vector3(scale, scale, scale);
         
         depthPercentage = (1 - (depth + 1f) / 200f);
+        if (depthPercentage <= .75f) {
+            depthPercentage = 0;
+        }
 
+        if (depthPercentage >= .95f) {
+            depthPercentage = 1;
+        }
+
+        if (depthPercentage == 0) {
+            var main = FX.main;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(.5f, 1.25f);
+        } else {
+            var main = FX.main;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(1.5f, 2f);
+        }
+
+       //Debug.Log(depthPercentage);
     }
 
     void checkPosition() {
@@ -146,13 +165,15 @@ public class FollowMouse_3D : MonoBehaviour {
 
     void waterSounds() {
 
-        float dis = Vector2.Distance(transform.position, cam.transform.position); 
-        float vol = AudioManager.RemapFloat(dis, 0, 4.5f, 0, 1f);
-        waterSfx.volume = vol;
+        float vol = ((1 - (depth + 1f) / 200f)) / 10f;
+        if (vol <= .045f) {
+            vol = .015f;
+        }
+        waterSfx.volume = vol ;
 
-		if (transform.position.x < Camera.main.transform.position.x) {dis *= -1;}
-		float pan = AudioManager.RemapFloat(dis, -5f, 5f, -1f, 1f);
-        waterSfx.panStereo = pan;
+		// if (transform.position.x < Camera.main.transform.position.x) {dis *= -1;}
+		// float pan = AudioManager.RemapFloat(dis, -5f, 5f, -1f, 1f);
+        // waterSfx.panStereo = pan;
     }
 
 

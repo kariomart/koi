@@ -9,9 +9,11 @@ public class GameMaster : MonoBehaviour {
 	public GameState[] gameStates;
 	public GameState gameState;
 	public int sfxChance;
-	public int stateTransitionChance;
 
-	public bool transitionGameState;
+	public int rainChance;
+	public bool raining;
+
+	public GameObject rainRipple;
 
 	// Use this for initialization
 	void Start () {
@@ -26,38 +28,35 @@ public class GameMaster : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-
-		ModulateWeather();
-		CheckWeather();
-
-		if (transitionGameState) {
-
-		}
-	}
-
-	void ModulateWeather() {
+	void FixedUpdate () {
 
 		int rand = Random.Range(0, sfxChance);
-
-		if (rand == 1) {
-
-			AudioManager.Instance.PlayRandomWeatherSFX();
-			
+		if (rand == 10) {
+			rand = Random.Range(0, 101);
+			if (rand > 50) {
+				AudioManager.Instance.PlayRandomAboveWaterSFX();
+			} else {
+				AudioManager.Instance.PlayRandomUnderwaterSFX();
+			}
 		}
-	}
 
-	void CheckWeather() {
-
-		int rand = Random.Range(0, stateTransitionChance);
-
-		if (rand == 1) {
-
-			transitionGameState = true;
-
+		rand = Random.Range(0, rainChance);
+		if (rand == 5 && !raining) {
+			AudioManager.Instance.playRain();
+			raining = true;
 		}
+
+
+
+		if (raining) {
+
+			rand = Random.Range(0, 100);
+			if (rand == 1) {
+				Instantiate(rainRipple, player.transform.position, Quaternion.identity);
+			}
+		
+		}	
+		
 	}
-
-
 
 }

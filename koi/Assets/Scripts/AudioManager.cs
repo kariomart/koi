@@ -7,7 +7,9 @@ public class AudioManager : MonoBehaviour {
 	
 	private static AudioManager instance = null;
 	public FollowMouse_3D player;
-	
+	int lastNotePlayed, lastUnderwaterSoundPlayed, lastAboveWaterSoundPlayed, lastRainPlayed = -1;
+
+	public AudioSource rainSource;
 	//we need an SFX Prefab - these will be instantiated for the purpose of playing sounds
 	[SerializeField] GameObject myPrefabSFX;
 	
@@ -17,6 +19,11 @@ public class AudioManager : MonoBehaviour {
 	public AudioClip[][] scales = new AudioClip[4][]; //, menuMusicAudioSource;
 
 	//this is where our game SFX are going to live
+
+	[Header("SFX")]
+	public AudioClip[] aboveWaterSFX;
+	public AudioClip[] underwaterSFX;
+	public AudioClip[] rainSFX;
 	
 	//clips that play when we activate different objects
 	[Header("Food Sounds")]
@@ -30,8 +37,10 @@ public class AudioManager : MonoBehaviour {
 	[Header("Mixer Groups")] 
 	public AudioMixerGroup abstractAmbience;
 	public AudioMixerGroup sfxMixer;
+	public AudioMixerGroup underwaterSFXMixer;
 	public AudioMixer ambienceMaster;
 	public AudioMixer sfxMaster;
+	public AudioMixer underwaterSFXMaster;
 
 	//Mixer snapshots let us crossfade easily between game states.
 	//We can also add weights to multiple snapshots in order to blend them.
@@ -39,12 +48,12 @@ public class AudioManager : MonoBehaviour {
 	// public AudioMixerSnapshot menuMixerSnapshot;
 	// public AudioMixerSnapshot gameMixerSnapshot;
 	float lowPassMin = 500f;
-	float lowPassMax = 2000f;
+	float lowPassMax = 8000f;
 	float chorusMax = .5f;
 	float distortionMax = 0.1f;
 
 	float sfxVolMin = -30;
-	float sfxVolMax = -15;
+	float sfxVolMax = -22;
 
 	public TextMesh debug;
 	
@@ -74,7 +83,7 @@ public class AudioManager : MonoBehaviour {
 
 		ambienceMaster = abstractAmbience.audioMixer;
 		sfxMaster = sfxMixer.audioMixer;
-		debug = GameObject.Find("debug").GetComponent<TextMesh>();
+		underwaterSFXMaster = underwaterSFXMixer.audioMixer;
 		setMixDefaults();
 		// if (SceneManager.GetActiveScene().name == "Menu") {
 		// 	StartMenu();
@@ -93,12 +102,54 @@ public class AudioManager : MonoBehaviour {
 		AudioClip foodSound;
 		//First find a clip randomly from the array
 		AudioClip[] scale = scales[scaleNum];
-		foodSound = scale[Random.Range(0, scale.Length)];
-		
+		int rand = Random.Range(0, scale.Length);
+
+		while (rand == lastNotePlayed) {
+			rand = Random.Range(0, scale.Length);
+		}
+
+		lastNotePlayed = rand;
+		foodSound = scale[rand];	
 //		Debug.Log(dis);
 		
 		//Then we play this clip - note that nothing is changing for panning and volume is set at 1.0
 		PlaySFX(foodSound, 1.0f, getPan(), 5f, abstractAmbience);
+	}
+
+	public void PlayRandomAboveWaterSFX() {
+		//Plays a random site sound when we find a site (one of the large circles)
+		AudioClip sfx;
+		//First find a clip randomly from the array
+		int rand = Random.Range(0, aboveWaterSFX.Length);
+
+		while (rand == lastNotePlayed) {
+			rand = Random.Range(0, aboveWaterSFX.Length);
+		}
+
+		lastAboveWaterSoundPlayed = rand;
+		sfx = aboveWaterSFX[rand];	
+//		Debug.Log(dis);
+		
+		//Then we play this clip - note that nothing is changing for panning and volume is set at 1.0
+		PlaySFX(sfx, 1.0f, getPan(), 5f, sfxMixer);
+	}
+
+	public void PlayRandomUnderwaterSFX() {
+		//Plays a random site sound when we find a site (one of the large circles)
+		AudioClip sfx;
+		//First find a clip randomly from the array
+		int rand = Random.Range(0, underwaterSFX.Length);
+
+		while (rand == lastUnderwaterSoundPlayed) {
+			rand = Random.Range(0, underwaterSFX.Length);
+		}
+
+		lastUnderwaterSoundPlayed = rand;
+		sfx = underwaterSFX[rand];	
+//		Debug.Log(dis);
+		
+		//Then we play this clip - note that nothing is changing for panning and volume is set at 1.0
+		PlaySFX(sfx, 1.0f, getPan(), 5f, underwaterSFXMixer);
 	}
 
 	public void PlayRandomWeatherSFX() {
@@ -108,6 +159,23 @@ public class AudioManager : MonoBehaviour {
 		sfx = state.sfx[Random.Range(0, state.sfx.Length)];
 		//PlaySFX(sfx, 1f, getPan(), sfxMixer);
 		PlayWeatherSFX(sfx, 1f, 1f, sfxMixer);
+
+	}
+
+	public void playRain() {
+
+		AudioClip sfx;
+		//First find a clip randomly from the array
+		int rand = Random.Range(0, rainSFX.Length);
+
+		while (rand == lastRainPlayed) {
+			rand = Random.Range(0, rainSFX.Length);
+		}
+
+		lastRainPlayed = rand;
+		sfx = rainSFX[rand];	
+		rainSource.clip = sfx;
+		rainSource.Play();
 
 	}
 	
@@ -172,20 +240,19 @@ public class AudioManager : MonoBehaviour {
 		sfxMaster.GetFloat("lowPassFreq", out lowPassVal);
 		sfxMaster.GetFloat("distortionLevel", out distortionVal);
 		sfxMaster.GetFloat("chorusMix", out chorusVal);
-		Debug.Log(player.depthPercentage);
+//		Debug.Log(player.depthPercentage);
 
 		float desiredVol = Mathf.Lerp(sfxVolMin, sfxVolMax, 1 - player.depthPercentage);
-		float newVol = Mathf.MoveTowards(volVal, desiredVol, 5f);
-
+		float newVol = Mathf.MoveTowards(volVal, desiredVol, 1f);
 
 		float desiredLowPass = Mathf.Lerp(lowPassMin, lowPassMax, 1 - player.depthPercentage);
-		float newLowpassVal = Mathf.MoveTowards(lowPassVal, desiredLowPass, 5f);
+		float newLowpassVal = Mathf.MoveTowards(lowPassVal, desiredLowPass, 25f);
 
 		float desiredChorus = Mathf.Lerp(0, chorusMax, player.depthPercentage);
-		float newChorusVal = Mathf.MoveTowards(chorusVal, desiredChorus, .5f);
+		float newChorusVal = Mathf.MoveTowards(chorusVal, desiredChorus, .05f);
 
-		float desiredDistortion = Mathf.Lerp(0, distortionMax, 1 - player.depthPercentage);
-		float newDistortionVal = Mathf.MoveTowards(distortionVal, desiredDistortion, 5f);
+		float desiredDistortion = Mathf.Lerp(0, distortionMax, player.depthPercentage);
+		float newDistortionVal = Mathf.MoveTowards(distortionVal, desiredDistortion, .05f);
 
 		sfxMaster.SetFloat("volume", newVol);
 		sfxMaster.SetFloat("lowPassFreq", newLowpassVal);
@@ -261,7 +328,7 @@ public class AudioManager : MonoBehaviour {
 		float val;
 		sfxMaster.GetFloat("lowPassFreq", out val);
 
-		debug.text = "depth: " + player.depth + "/" + player.desiredDepth + "  |  disToFood: " + player.disToFood + "  |  lowpass: " + val;
+		debug.text = "depth: " + player.depth + "/" + player.desiredDepth;
 
 	}
 
