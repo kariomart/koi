@@ -40,6 +40,13 @@ public class AudioManager : MonoBehaviour {
 	// public AudioMixerSnapshot gameMixerSnapshot;
 	float lowPassMin = 500f;
 	float lowPassMax = 2000f;
+	float chorusMax = .5f;
+	float distortionMax = 0.1f;
+
+	float sfxVolMin = -30;
+	float sfxVolMax = -15;
+
+	public TextMesh debug;
 	
 
 	//========================================================================
@@ -67,8 +74,8 @@ public class AudioManager : MonoBehaviour {
 
 		ambienceMaster = abstractAmbience.audioMixer;
 		sfxMaster = sfxMixer.audioMixer;
-		sfxMaster.SetFloat("lowPassFreq", lowPassMin);
-
+		debug = GameObject.Find("debug").GetComponent<TextMesh>();
+		setMixDefaults();
 		// if (SceneManager.GetActiveScene().name == "Menu") {
 		// 	StartMenu();
 		// }
@@ -148,6 +155,45 @@ public class AudioManager : MonoBehaviour {
 		Destroy(t_SFX.gameObject, g_SFX.length);
 	}
 
+	public void setMixDefaults() {
+
+		sfxMaster.SetFloat("volume", -30f);
+		sfxMaster.SetFloat("lowPassFreq", 500f);
+		sfxMaster.SetFloat("distortionLevel", 0.1f);
+		sfxMaster.SetFloat("chorusMix", .5f);
+
+	}
+
+	public void updateFilters() {
+
+		float volVal, lowPassVal, distortionVal, chorusVal;
+
+		sfxMaster.GetFloat("volume", out volVal);
+		sfxMaster.GetFloat("lowPassFreq", out lowPassVal);
+		sfxMaster.GetFloat("distortionLevel", out distortionVal);
+		sfxMaster.GetFloat("chorusMix", out chorusVal);
+		Debug.Log(player.depthPercentage);
+
+		float desiredVol = Mathf.Lerp(sfxVolMin, sfxVolMax, 1 - player.depthPercentage);
+		float newVol = Mathf.MoveTowards(volVal, desiredVol, 5f);
+
+
+		float desiredLowPass = Mathf.Lerp(lowPassMin, lowPassMax, 1 - player.depthPercentage);
+		float newLowpassVal = Mathf.MoveTowards(lowPassVal, desiredLowPass, 5f);
+
+		float desiredChorus = Mathf.Lerp(0, chorusMax, player.depthPercentage);
+		float newChorusVal = Mathf.MoveTowards(chorusVal, desiredChorus, .5f);
+
+		float desiredDistortion = Mathf.Lerp(0, distortionMax, 1 - player.depthPercentage);
+		float newDistortionVal = Mathf.MoveTowards(distortionVal, desiredDistortion, 5f);
+
+		sfxMaster.SetFloat("volume", newVol);
+		sfxMaster.SetFloat("lowPassFreq", newLowpassVal);
+		sfxMaster.SetFloat("distortionLevel", newDistortionVal);
+		sfxMaster.SetFloat("chorusMix", newChorusVal);
+
+	}
+
 	public void openFilter() {
 
 		float val;
@@ -208,7 +254,16 @@ public class AudioManager : MonoBehaviour {
 		float pan = Mathf.Clamp(dis /= 5f, -1, 1);
 
 		return pan;
-}
+	}
+
+	public void updateDebug() {
+
+		float val;
+		sfxMaster.GetFloat("lowPassFreq", out val);
+
+		debug.text = "depth: " + player.depth + "/" + player.desiredDepth + "  |  disToFood: " + player.disToFood + "  |  lowpass: " + val;
+
+	}
 
 
 

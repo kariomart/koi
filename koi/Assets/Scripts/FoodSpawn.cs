@@ -7,6 +7,7 @@ public class FoodSpawn : MonoBehaviour {
 	public GameObject food;
 	public int numOfFood;
 	public int foodRange;
+	public List<GameObject> foods = new List<GameObject>();
 
 	// Use this for initialization
 	void Start () {
@@ -28,9 +29,9 @@ public class FoodSpawn : MonoBehaviour {
 
 			GameObject f = Instantiate (food, new Vector3(Random.Range (-foodRange, foodRange), .51f, Random.Range (-foodRange, foodRange)), Quaternion.identity);
 			f.transform.parent = foodParent.transform;
+			foods.Add(f);
 
 		}
-
-
 	}
+
 }
