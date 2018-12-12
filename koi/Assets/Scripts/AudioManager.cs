@@ -102,6 +102,8 @@ public class AudioManager : MonoBehaviour {
 		AudioClip foodSound;
 		//First find a clip randomly from the array
 		AudioClip[] scale = scales[scaleNum];
+		Debug.Log(scale.Length);
+
 		int rand = Random.Range(0, scale.Length);
 
 		while (rand == lastNotePlayed) {
@@ -131,7 +133,7 @@ public class AudioManager : MonoBehaviour {
 //		Debug.Log(dis);
 		
 		//Then we play this clip - note that nothing is changing for panning and volume is set at 1.0
-		PlaySFX(sfx, 1.0f, getPan(), 5f, sfxMixer);
+		CreateRandomSound(sfx, 1.0f, 1, sfxMixer);
 	}
 
 	public void PlayRandomUnderwaterSFX() {
@@ -149,7 +151,7 @@ public class AudioManager : MonoBehaviour {
 //		Debug.Log(dis);
 		
 		//Then we play this clip - note that nothing is changing for panning and volume is set at 1.0
-		PlaySFX(sfx, 1.0f, getPan(), 5f, underwaterSFXMixer);
+		CreateRandomSound(sfx, 1.0f, 1, underwaterSFXMixer);
 	}
 
 	public void PlayRandomWeatherSFX() {
@@ -158,7 +160,7 @@ public class AudioManager : MonoBehaviour {
 		GameState state = GameMaster.me.gameState;
 		sfx = state.sfx[Random.Range(0, state.sfx.Length)];
 		//PlaySFX(sfx, 1f, getPan(), sfxMixer);
-		PlayWeatherSFX(sfx, 1f, 1f, sfxMixer);
+		//PlayWeatherSFX(sfx, 1f, 1f, sfxMixer);
 
 	}
 
@@ -176,9 +178,30 @@ public class AudioManager : MonoBehaviour {
 		sfx = rainSFX[rand];	
 		rainSource.clip = sfx;
 		rainSource.Play();
+		StartCoroutine("FadeInRain");
 
 	}
-	
+
+
+	public IEnumerator FadeOutRain() {
+
+     for (float v = rainSource.volume; v > 0f; v -= Time.deltaTime / 2.0f) 
+     {
+         rainSource.volume = v;
+         yield return null;
+     }
+     rainSource.volume = 0;
+ 	}
+
+	 public IEnumerator FadeInRain() {
+
+     for (float v = rainSource.volume; v < 1f; v += Time.deltaTime / 2.0f) 
+     {
+         rainSource.volume = v;
+         yield return null;
+     }
+     rainSource.volume = 1;
+ 	}
 	//========================================================================
 	
 	
@@ -211,7 +234,7 @@ public class AudioManager : MonoBehaviour {
 		Destroy(t_SFX.gameObject, g_SFX.length);
 	}
 
-	public void PlayWeatherSFX (AudioClip g_SFX, float g_Volume, float g_Pan, AudioMixerGroup g_destGroup) {
+	public void CreateRandomSound (AudioClip g_SFX, float g_Volume, float g_Pan, AudioMixerGroup g_destGroup) {
 		GameObject t_SFX = Instantiate (myPrefabSFX, new Vector3(player.transform.position.x + Random.Range(-10f, 10f), player.transform.position.y,  player.transform.position.z + Random.Range(-10f, 10f)), Quaternion.identity);
 		t_SFX.name = "SFX_" + g_SFX.name;
 		AudioSource source = t_SFX.GetComponent<AudioSource> ();

@@ -11,6 +11,7 @@ public class GameMaster : MonoBehaviour {
 	public int sfxChance;
 
 	public int rainChance;
+	public int rainStopChance;
 	public bool raining;
 
 	public GameObject rainRipple;
@@ -43,6 +44,7 @@ public class GameMaster : MonoBehaviour {
 		rand = Random.Range(0, rainChance);
 		if (rand == 5 && !raining) {
 			AudioManager.Instance.playRain();
+			AudioManager.Instance.scaleNum = 2;
 			raining = true;
 		}
 
@@ -53,6 +55,13 @@ public class GameMaster : MonoBehaviour {
 			rand = Random.Range(0, 100);
 			if (rand == 1) {
 				Instantiate(rainRipple, player.transform.position, Quaternion.identity);
+			}
+
+			rand = Random.Range(0, rainStopChance);
+			if (rand == 1) {
+				raining = false;
+				AudioManager.Instance.StartCoroutine("FadeOutRain");
+				AudioManager.Instance.scaleNum = 0;
 			}
 		
 		}	
